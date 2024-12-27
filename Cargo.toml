@@ -1,0 +1,7 @@
+[package]
+name = "fuel-vm-benchmark"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+fuel-vm = { git = "https://github.com/FuelLabs/fuel-vm.git", branch = "master" }
