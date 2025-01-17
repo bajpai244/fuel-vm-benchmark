@@ -19,6 +19,9 @@ use revm::primitives::{Address as RevmAddress, Bytes, U256 as RevmU256};
 use revm::specification::hardfork::SpecId;
 use revm::state::Bytecode;
 
+// This binary runs the fuelVM and rEVM over loops of different sizes to perform addition
+// both the VMs are running handwritten bytecode to avoid language compiler optimization issues
+// It dumps the data into JSON file for plotting
 fn main() {
     let mut interpreter = Interpreter::<_, _, Script>::with_storage(
         MemoryInstance::new(),
@@ -29,8 +32,10 @@ fn main() {
         },
     );
 
+    // since movi can only move 18 bit numbers, we use multiplication to get upto 36 bit numbers for the number of iterations
     let a: u32 = 100000;
-    let b: u32 = 10000;
+    let b: u32 = 1000;
+    // the number of iterations the VMs will run for addition
     let number_of_iterations: u64 = (a * b).into();
 
     println!("number_of_iterations: {:?}", number_of_iterations);
@@ -39,6 +44,7 @@ fn main() {
     let reg_b = RegId::new(20);
     let reg_result = RegId::new(21);
 
+    // Starts with result = 0, add 1 to it `number_of_iterations` times
     let script = TransactionBuilder::script(
         vec![
             op::movi(reg_a, a),
@@ -85,12 +91,14 @@ fn main() {
     println!("addition result on FuelVM: {:?}", result);
     println!("Time elapsed on FuelVM: {:?}", duration);
 
-    // convert number of iterations to bytes, little endian, padded to 8 bytes
-    let number_of_iterations_bytes = number_of_iterations.to_be_bytes();
-    // println!("number_of_iterations_bytes: {:?}", number_of_iterations_bytes);
 
+    // reth side of the code
+
+    let number_of_iterations_bytes = number_of_iterations.to_be_bytes();
+
+    // Starts with result = 0, add 1 to it `number_of_iterations` times
     let bytecode = [
-        0x67,
+        0x67, // PUSH8 number_of_iterations
         number_of_iterations_bytes[0],
         number_of_iterations_bytes[1],
         number_of_iterations_bytes[2],
@@ -98,26 +106,21 @@ fn main() {
         number_of_iterations_bytes[4],
         number_of_iterations_bytes[5],
         number_of_iterations_bytes[6],
-        number_of_iterations_bytes[7], // PUSH8 number_of_iterations
-        0x60,
-        0x00, // PUSH1 0x00
+        number_of_iterations_bytes[7],
+        0x60, 0x00, // PUSH1 0x00
         0x5b, // JUMPDEST
         0x81, // DUP2
         0x15, // ISZERO
-        0x60,
-        0x1d, // PUSH1 0x1d
+        0x60, 0x1d, // PUSH1 0x1d
         0x57, // JUMPI
-        0x60,
-        0x01, // PUSH1 0x01
+        0x60, 0x01, // PUSH1 0x01
         0x01, // ADD
         0x90, // SWAP1
-        0x60,
-        0x01, // PUSH1 0x01
+        0x60, 0x01, // PUSH1 0x01
         0x90, // SWAP1
         0x03, // SUB
         0x90, // SWAP1
-        0x60,
-        0x0b, // PUSH1 0x0b
+        0x60, 0x0b, // PUSH1 0x0b
         0x56, // JUMP
         0x5b, // JUMPDEST
         0x90, // SWAP1
@@ -125,10 +128,6 @@ fn main() {
     ]
     .to_vec();
 
-    // reth side of the code
-    // ---------
-    // the bytecode needs to the following:
-    // iterate a certain number of times, and keep adding 1 to the result which is initially zero
     let bytecode = Bytecode::new_raw(Bytes::from(bytecode));
 
     let mut interpreter = RevmInterpreter::<EthInterpreter>::new(
@@ -153,7 +152,8 @@ fn main() {
     let start = Instant::now();
     interpreter.run(&table, &mut host);
     let duration = start.elapsed();
-    println!("Time elapsed on rEVM: {:?}", duration);
 
     println!("result on rEVM: {:?}", interpreter.stack.pop());
+    println!("Time elapsed on rEVM: {:?}", duration);
+
 }
