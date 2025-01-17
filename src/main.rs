@@ -33,7 +33,7 @@ fn main() {
     );
 
     // since movi can only move 18 bit numbers, we use multiplication to get upto 36 bit numbers for the number of iterations
-    let a: u32 = 100000;
+    let a: u32 = 1000;
     let b: u32 = 1000;
     // the number of iterations the VMs will run for addition
     let number_of_iterations: u64 = (a * b).into();
