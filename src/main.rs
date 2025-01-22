@@ -90,7 +90,6 @@ fn main() {
     println!("addition result on FuelVM: {:?}", result);
     println!("Time elapsed on FuelVM: {:?}", duration);
 
-
     // reth side of the code
 
     let number_of_iterations_bytes = number_of_iterations.to_be_bytes();
@@ -106,20 +105,25 @@ fn main() {
         number_of_iterations_bytes[5],
         number_of_iterations_bytes[6],
         number_of_iterations_bytes[7],
-        0x60, 0x00, // PUSH1 0x00
+        0x60,
+        0x00, // PUSH1 0x00
         0x5b, // JUMPDEST
         0x81, // DUP2
         0x15, // ISZERO
-        0x60, 0x1d, // PUSH1 0x1d
+        0x60,
+        0x1d, // PUSH1 0x1d
         0x57, // JUMPI
-        0x60, 0x01, // PUSH1 0x01
+        0x60,
+        0x01, // PUSH1 0x01
         0x01, // ADD
         0x90, // SWAP1
-        0x60, 0x01, // PUSH1 0x01
+        0x60,
+        0x01, // PUSH1 0x01
         0x90, // SWAP1
         0x03, // SUB
         0x90, // SWAP1
-        0x60, 0x0b, // PUSH1 0x0b
+        0x60,
+        0x0b, // PUSH1 0x0b
         0x56, // JUMP
         0x5b, // JUMPDEST
         0x90, // SWAP1
@@ -154,5 +158,4 @@ fn main() {
 
     println!("result on rEVM: {:?}", interpreter.stack.pop());
     println!("Time elapsed on rEVM: {:?}", duration);
-
 }
