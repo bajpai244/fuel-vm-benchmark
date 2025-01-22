@@ -7,6 +7,7 @@ use fuel_vm::{
     storage::MemoryStorage,
 };
 
+#[derive(Debug)]
 pub enum FuelVMExecutorError {
     Revert,
 }

@@ -11,6 +11,7 @@ use revm::{
     state::Bytecode,
 };
 
+#[derive(Debug)]
 pub enum EVMExecutorError {}
 
 pub struct EVMExecutor {
