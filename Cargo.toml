@@ -12,5 +12,5 @@ serde = "1.0.217"
 criterion = { version = "0.5", features = ["html_reports"] }
 
 [[bench]]
-name = "fibonacci"
+name = "counter"
 harness = false
