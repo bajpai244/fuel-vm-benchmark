@@ -4,5 +4,5 @@ benchmarks FuelVM compared to rEVM, right now a simple benchamrk of doing loops 
 
 To run:
 ```shell
-cargo run --release
+cargo bench
 ```
